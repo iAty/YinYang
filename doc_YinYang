@@ -1,0 +1,114 @@
+# 1. Könyvtárak importálása
+
+Az első lépésben importáljuk a szükséges csomagokat:
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import ipywidgets as widgets
+from IPython.display import display
+```
+
+### Mit csinálnak ezek?
+- matplotlib.pyplot (plt): A grafikonokat és az alakzatokat (pl. körök) rajzolja meg.
+- numpy (np): A matematikai számításokhoz kell (pl. forgatás).
+- ipywidgets: Ez biztosítja az interaktív csúszkákat, színválasztókat stb IPython.display.display: Segítségével megjeleníthetjük az interaktív elemeket Jupyter Notebookban.
+
+# 2. Osztály létrehozása
+
+Létrehozunk egy InteractiveYinYang nevű osztályt:
+
+```python
+class InteractiveYinYang:
+```
+Ez az osztály felelős a Yin-Yang szimbólum megrajzolásáért és az interaktív kezelőfelületért.
+
+# 3. Az osztály inicializálása init metódus
+
+Ez a metódus akkor fut le, amikor létrehozunk egy példányt az osztályból.
+
+```python
+def __init__(self, small_circle_ratio=0.125, angle=0, color1='black', color2='white', bg_color='white'):
+```
+Mit csinál?
+
+Beállítja az alapértelmezett paramétereket:
+- small_circle_ratio: A kis körök mérete az egész szimbólumhoz viszonyítva.
+- angle: A szimbólum elforgatási szöge (fokban megadva).
+- color1 és color2: A Yin és Yang színei.
+- bg_color: A háttér színe.
+
+Majd létrehoz egy matplotlib ábrát és tengelyt:
+
+```python
+self.fig, self.ax = plt.subplots()
+self.ax.set_aspect('equal')
+self.ax.axis('off')
+```
+
+- plt.subplots(): Létrehoz egy üres ábrát.
+- self.ax.set_aspect('equal'): Biztosítja, hogy a körök ne torzuljanak.
+- self.ax.axis('off'): Kikapcsolja a tengelyeket.
+
+```python
+self.draw_yin_yang()
+```
+
+# 4. Pontok forgatása (rotate metódus)
+
+Ez a függvény segít egy adott pontot elforgatni a szimbólum körül:
+
+```python
+def rotate(self, x, y):
+    theta = np.radians(self.angle)  # Szöget átváltjuk fokból radiánba
+    x_new = x * np.cos(theta) - y * np.sin(theta)
+    y_new = x * np.sin(theta) + y * np.cos(theta)
+    return x_new, y_new
+```
+Mivel a Yin-Yang szimbólumot el kell tudnunk forgatni, minden elemnek alkalmaznia kell ezt az átalakítást.
+
+# 5. Yin-Yang szimbólum kirajzolása (draw_yin_yang metódus)
+
+Ez a legfontosabb függvény, amely minden egyes elemét megrajzolja a szimbólumnak.
+
+Első lépés: Az előző rajz törlése
+
+```python
+self.ax.clear()
+self.ax.set_aspect('equal')
+self.ax.set_xlim(-1.1, 1.1)
+self.ax.set_ylim(-1.1, 1.1)
+self.ax.axis('off')
+self.fig.patch.set_facecolor(self.bg_color)
+```
+
+- self.ax.clear(): Minden új rajzolás előtt töröljük a régi rajzot.
+- A beállítások frissítése: A skálázás és a tengelyek kikapcsolása.
+- Háttérszín beállítása: Most már az interaktív módon választott háttérszín is módosítható!
+
+## A fő kör megrajzolása
+
+Ezek a félkörök úgy jönnek létre, hogy az egyik fehér, a másik fekete.
+
+```python
+main_circle = plt.Circle((0, 0), 1, color=self.color1, fill=True)
+self.ax.add_patch(main_circle)
+```
+- plt.Circle((0, 0), 1, color=self.color1, fill=True): Egy 1 sugarú kört rajzolunk ki középponttal (0,0).
+- Ez az alap, amire a többi elem kerül.
+
+## A Yin és Yang félkörök
+
+Ezek a félkörök úgy jönnek létre, hogy az egyik fehér, a másik fekete.
+
+```python
+x1, y1 = self.rotate(0, 0.5)
+half_circle_white = plt.Circle((x1, y1), 0.5, color=self.color2, fill=True)
+self.ax.add_patch(half_circle_white)
+```
+
+- Az egyik félkör középpontja a felső részen van (0,0.5).
+- Ezt elforgatjuk a rotate függvénnyel.
+- A fehér félkört a fekete kör felébe helyezzük.
+
+
